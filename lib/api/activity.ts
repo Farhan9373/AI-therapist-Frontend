@@ -11,7 +11,7 @@ export async function logActivity(
   const token = localStorage.getItem("token");
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch("/api/activity", {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/api/activity`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

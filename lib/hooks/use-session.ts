@@ -32,7 +32,7 @@ export function useSession() {
       }
 
       console.log("useSession: Fetching user data...");
-      const response = await fetch("/api/auth/me", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/auth/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -65,7 +65,7 @@ export function useSession() {
     try {
       const token = localStorage.getItem("token");
       if (token) {
-        await fetch("/api/auth/logout", {
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/auth/logout`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,

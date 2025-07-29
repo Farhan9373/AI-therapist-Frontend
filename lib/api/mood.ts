@@ -22,7 +22,7 @@ export async function trackMood(
   const token = localStorage.getItem("token");
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch("/api/mood", {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/mood`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -52,7 +52,7 @@ export async function getMoodHistory(params?: {
   if (params?.endDate) queryParams.append("endDate", params.endDate);
   if (params?.limit) queryParams.append("limit", params.limit.toString());
 
-  const response = await fetch(`/api/mood/history?${queryParams.toString()}`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/mood/history?${queryParams.toString()}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -75,7 +75,7 @@ export async function getMoodStats(
   const token = localStorage.getItem("token");
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(`/api/mood/stats?period=${period}`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/mood/stats?period=${period}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

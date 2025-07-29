@@ -40,10 +40,10 @@ export interface ApiResponse {
   };
 }
 
-const API_BASE =
-  process.env.BACKEND_API_URL ||
-  "https://ai-therapist-agent-backend.onrender.com";
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_API ||
+  "";
 
+  console.log("API_BASE:", API_BASE);
 // Helper function to get auth headers
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");

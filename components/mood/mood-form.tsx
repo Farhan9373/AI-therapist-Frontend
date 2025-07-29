@@ -53,14 +53,17 @@ export function MoodForm({ onSuccess }: MoodFormProps) {
         token ? "exists" : "not found"
       );
 
-      const response = await fetch("/api/mood", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ score: moodScore }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API}/api/mood`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ score: moodScore }),
+        }
+      );
 
       console.log("MoodForm: Response status:", response.status);
 
