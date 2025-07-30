@@ -16,6 +16,7 @@ import {
   Smile,
   PlusCircle,
   MessageSquare,
+  Menu,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -103,6 +104,8 @@ export default function TherapyPage() {
   const [isChatPaused, setIsChatPaused] = useState(false);
   const [showNFTCelebration, setShowNFTCelebration] = useState(false);
   const [isCompletingSession, setIsCompletingSession] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const [sessionId, setSessionId] = useState<string | null>(
     params.sessionId as string
   );
@@ -426,9 +429,26 @@ export default function TherapyPage() {
 
   return (
     <div className="relative max-w-7xl mx-auto px-4">
-      <div className="flex h-[calc(100vh-4rem)] mt-20 gap-6">
-        {/* Sidebar with chat history */}
-        <div className="w-80 flex flex-col border-r bg-muted/30">
+      {/* Mobile Header */}
+      <div className="md:hidden fixed top-0 left-0 w-full z-30 bg-white dark:bg-background border-b h-16 flex items-center justify-between px-4">
+        <h2 className="text-lg font-semibold">AI Therapist</h2>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          <Menu className="w-5 h-5" />
+        </Button>
+      </div>
+
+      <div className="flex h-[calc(100vh-4rem)] pt-20 gap-6 relative">
+        {/* Sidebar */}
+        <div
+          className={cn(
+            "fixed z-40 inset-y-0 left-0 w-80 bg-muted/30 transform transition-transform duration-300 md:relative md:translate-x-0 md:flex md:flex-col md:border-r",
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          )}
+        >
           <div className="p-4 border-b">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Chat Sessions</h2>
@@ -472,7 +492,10 @@ export default function TherapyPage() {
                       ? "bg-primary/10 text-primary"
                       : "bg-secondary/10"
                   )}
-                  onClick={() => handleSessionSelect(session.sessionId)}
+                  onClick={() => {
+                    handleSessionSelect(session.sessionId);
+                    setSidebarOpen(false);
+                  }}
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <MessageSquare className="w-4 h-4" />
@@ -492,13 +515,10 @@ export default function TherapyPage() {
                       {(() => {
                         try {
                           const date = new Date(session.updatedAt);
-                          if (isNaN(date.getTime())) {
-                            return "Just now";
-                          }
-                          return formatDistanceToNow(date, {
-                            addSuffix: true,
-                          });
-                        } catch (error) {
+                          return isNaN(date.getTime())
+                            ? "Just now"
+                            : formatDistanceToNow(date, { addSuffix: true });
+                        } catch {
                           return "Just now";
                         }
                       })()}
@@ -510,9 +530,17 @@ export default function TherapyPage() {
           </ScrollArea>
         </div>
 
-        {/* Main chat area */}
+        {/* Overlay */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-30 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* Chat */}
         <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-background rounded-lg border">
-          {/* Chat header */}
+          {/* Header */}
           <div className="p-4 border-b flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
@@ -528,37 +556,32 @@ export default function TherapyPage() {
           </div>
 
           {messages.length === 0 ? (
-            // Welcome screen with suggested questions
             <div className="flex-1 flex items-center justify-center p-4">
-              <div className="max-w-2xl w-full space-y-8">
-                <div className="text-center space-y-4">
-                  <div className="relative inline-flex flex-col items-center">
+              <div className="max-w-2xl w-full space-y-8 text-center">
+                <div className="relative inline-flex flex-col items-center">
+                  <motion.div
+                    className="absolute inset-0 bg-primary/20 blur-2xl rounded-full"
+                    initial="initial"
+                    animate="animate"
+                    variants={glowAnimation}
+                  />
+                  <div className="relative flex items-center gap-2 text-2xl font-semibold">
+                    <Sparkles className="w-6 h-6 text-primary" />
                     <motion.div
-                      className="absolute inset-0 bg-primary/20 blur-2xl rounded-full"
+                      className="absolute inset-0 text-primary"
                       initial="initial"
                       animate="animate"
                       variants={glowAnimation}
-                    />
-                    <div className="relative flex items-center gap-2 text-2xl font-semibold">
-                      <div className="relative">
-                        <Sparkles className="w-6 h-6 text-primary" />
-                        <motion.div
-                          className="absolute inset-0 text-primary"
-                          initial="initial"
-                          animate="animate"
-                          variants={glowAnimation}
-                        >
-                          <Sparkles className="w-6 h-6" />
-                        </motion.div>
-                      </div>
-                      <span className="bg-gradient-to-r from-primary/90 to-primary bg-clip-text text-transparent">
-                        AI Therapist
-                      </span>
-                    </div>
-                    <p className="text-muted-foreground mt-2">
-                      How can I assist you today?
-                    </p>
+                    >
+                      <Sparkles className="w-6 h-6" />
+                    </motion.div>
+                    <span className="bg-gradient-to-r from-primary/90 to-primary bg-clip-text text-transparent">
+                      AI Therapist
+                    </span>
                   </div>
+                  <p className="text-muted-foreground mt-2">
+                    How can I assist you today?
+                  </p>
                 </div>
 
                 <div className="grid gap-3 relative">
@@ -577,7 +600,7 @@ export default function TherapyPage() {
                     >
                       <Button
                         variant="outline"
-                        className="w-full h-auto py-4 px-6 text-left justify-start hover:bg-muted/50 hover:border-primary/50 transition-all duration-300"
+                        className="w-full h-auto py-4 px-6 text-left justify-start hover:bg-muted/50 hover:border-primary/50"
                         onClick={() => handleSuggestedQuestion(q.text)}
                       >
                         {q.text}
@@ -588,7 +611,6 @@ export default function TherapyPage() {
               </div>
             </div>
           ) : (
-            // Chat messages
             <div className="flex-1 overflow-y-auto scroll-smooth">
               <div className="max-w-3xl mx-auto">
                 <AnimatePresence initial={false}>
@@ -666,7 +688,7 @@ export default function TherapyPage() {
             </div>
           )}
 
-          {/* Input area */}
+          {/* Input */}
           <div className="border-t bg-background/50 backdrop-blur supports-[backdrop-filter]:bg-background/50 p-4">
             <form
               onSubmit={handleSubmit}
@@ -682,10 +704,8 @@ export default function TherapyPage() {
                       : "Ask me anything..."
                   }
                   className={cn(
-                    "w-full resize-none rounded-2xl border bg-background",
-                    "p-3 pr-12 min-h-[48px] max-h-[200px]",
-                    "focus:outline-none focus:ring-2 focus:ring-primary/50",
-                    "transition-all duration-200",
+                    "w-full resize-none rounded-2xl border bg-background p-3 pr-12 min-h-[48px] max-h-[200px]",
+                    "focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-200",
                     "placeholder:text-muted-foreground/70",
                     (isTyping || isChatPaused) &&
                       "opacity-50 cursor-not-allowed"
@@ -703,19 +723,13 @@ export default function TherapyPage() {
                   type="submit"
                   size="icon"
                   className={cn(
-                    "absolute right-1.5 bottom-3.5 h-[36px] w-[36px]",
-                    "rounded-xl transition-all duration-200",
-                    "bg-primary hover:bg-primary/90",
-                    "shadow-sm shadow-primary/20",
+                    "absolute right-1.5 bottom-3.5 h-[36px] w-[36px] rounded-xl",
+                    "bg-primary hover:bg-primary/90 shadow-sm shadow-primary/20 transition-all duration-200",
                     (isTyping || isChatPaused || !message.trim()) &&
                       "opacity-50 cursor-not-allowed",
                     "group-hover:scale-105 group-focus-within:scale-105"
                   )}
                   disabled={isTyping || isChatPaused || !message.trim()}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleSubmit(e);
-                  }}
                 >
                   <Send className="w-4 h-4" />
                 </Button>
